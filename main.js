@@ -33,36 +33,20 @@ function start() {
         .attr('width', width)
         .attr('height', height);
 
-    // Remember, "svg" now references to <svg width="700" height="600"></svg>
-    // So now we append a group <g></g> tag to our svg element, and return a
-    // reference to that and save it in the "bars" variable.
-    //
-    // Now bars looks like this:
-    // <g></g>
-    //
-    // And the svg element in our browser looks like this:
-    // <svg width="700" height="600">
-    //  <g></g>
-    // </svg>
     var dots = svg.append('g');
 
 
     // Our bar chart is going to encode the profit along different topics
     // This means that the length of the x axis depends on the number of categories.
     // The y axis should cover the range of profits/losses of the data.
-    var xScale = d3.scale.ordinal().rangeBands([0, width]);
-    var yScale = d3.scale.linear().range([10, height - 10]);
-    var rScale = d3.scale.linear().range([5, 50]);
-
-    // Tell D3 to create a y-axis scale for us, and orient it to the left.
-    // That means the labels are on the left, and tick marks on the right.
-    var xAxis = d3.svg.axis().scale(xScale);
-    var yAxis = d3.svg.axis().scale(yScale).orient('left');
+    var xScale = d3.scaleBand().rangeRound([0, width]);
+    var yScale = d3.scaleLinear().range([10, height - 10]);
+    var rScale = d3.scaleLinear().range([5, 25]);
 
 
-    // D3 will grab all the data from "data.csv" and make it available
-    // to us in a callback function. It follows the form:
-    //
+
+
+
     // d3.csv('file_name.csv', accumulator, callback)
     //
     // Where 'file_name.csv' - the name of the file to read
@@ -79,18 +63,16 @@ function start() {
         d.gross = +d.gross;
         d.movie_facebook_likes = +d.movie_facebook_likes;
         d.genres = d.genres.split("|")[0];
+        d.x = xScale(d.genres) + 74;
+        d.y = yScale(d.gross - d.budget);
         return d;
     }, function(error, data) {
 
-        // We set the domain of the xScale. The domain includes 0 up to
-        // the maximum frequency in the dataset. This is because
         xScale.domain(data.map(function(d){
             return d.genres;
         }));
 
-        // We set the domain of the yScale. Our scale is linear with a minimum at the
-        //highest loss, and a max at the highest profit. So the max difference and the
-        //minimum difference with negatives counted.
+
         yScale.domain([d3.max(data, function(e) {
             return e.gross - e.budget;
         }) + 20000000, -200000000]);
@@ -102,18 +84,25 @@ function start() {
         dots.append('g')
             .attr('class', 'y axis')
             .attr('transform', 'translate(50, 0)')
-            .call(yAxis.ticks(height/20).tickFormat(d3.format("s")));
+            .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")));
 
         dots.append("g")
             .attr('class', 'x axis')
             .attr('transform', 'translate(50,'+ (height - 20) + ' )')
-            .call(xAxis);
+            .call(d3.axisBottom(xScale));
 
         // Create the bars in the graph. First, select all '.bars' that
         // currently exist, then load the data into them. enter() selects
         // all the pieces of data and lets us operate on them.
         var dotEnter = dots.selectAll('.dot').data(data).enter();
         var dotExit = dots.selectAll('.dot').data(data).exit();
+
+        var simulation = d3.forceSimulation(dots)
+            .force('collide', d3.forceCollide(function(d){return rScale(d.movie_facebook_likes) + 5}))
+            // .force('collision', d3.forceCollide().radius(function(d) {
+            //     return rScale(d.movie_facebook_likes)
+            // }))
+            //.on('tick', ticked);
 
         dots.append('g')
             .selectAll('.dot')
@@ -135,5 +124,23 @@ function start() {
                 console.log(d.movie_facebook_likes);
                 console.log(d.movie_title);
             });
+
+        // function ticked() {
+        //   var u = d3.select('svg')
+        //     .selectAll('circle')
+        //     .data(dots)
+
+        //   u.enter()
+        //     .append('circle')
+        //     .merge(u)
+        //     .attr('cx', function(d) {
+        //       return d.x
+        //     })
+        //     .attr('cy', function(d) {
+        //       return d.y
+        //     })
+
+        //   u.exit().remove()
+        // }
     });
 }
