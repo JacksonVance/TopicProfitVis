@@ -108,7 +108,7 @@ function start() {
 
         dots.append('g')
             .attr('class', 'y axis')
-            .attr('transform', 'translate(50, 0)')
+            .attr('transform', 'translate(60, 0)')
             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")));
 
         dots.append("g")
@@ -132,7 +132,7 @@ function start() {
             .attr('class', 'dot')
             
             .attr('cx', function(d) {
-                return xScale(d.genres) + 74;
+                return xScale(d.genres) + 84;
             })
             .attr('cy', function(d) {
                 return yScale(d.gross - d.budget);
@@ -159,8 +159,13 @@ function start() {
                 console.log(d.movie_title);
             });
 
-        dots.append("text")
-            .attr("transform", `translate(300,$400)`)
-            .text("Movie Genre");
+        //tryna make axis labels appear (no succes yet)
+        // dots.append("text")
+        //     .attr("transform", "translate(" + (width/2) + ", " + height + ")")
+        //     .text("Movie Genre");
+
+        // dots.append("g")
+        //     .attr("transform", "translate(0," + height + ")")
+        //     .call(d3.axisBottom(x));
     });
 }
