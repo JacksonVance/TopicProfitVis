@@ -16,8 +16,8 @@ function start() {
     // Specify the width and height of our graph
     // as variables so we can use them later.
     // Remember, hardcoding sucks! :)
-    var width = window.innerWidth;
-    var height = window.innerHeight;
+    var width = window.innerWidth -40;
+    var height = window.innerHeight - 50;
 
     // Here we tell D3 to select the graph that we defined above.
     // Then, we add an <svg></svg> tag inside the graph.
@@ -30,9 +30,20 @@ function start() {
     // </svg>
     var svg = d3.select(graph)
         .append('svg')
-        .attr('width', width)
-        .attr('height', height);
+        .attr('width', width + 40)
+        .attr('height', height + 50);
 
+    // Remember, "svg" now references to <svg width="700" height="600"></svg>
+    // So now we append a group <g></g> tag to our svg element, and return a
+    // reference to that and save it in the "bars" variable.
+    //
+    // Now bars looks like this:
+    // <g></g>
+    //
+    // And the svg element in our browser looks like this:
+    // <svg width="700" height="600">
+    //  <g></g>
+    // </svg>
     var dots = svg.append('g');
 
 
@@ -41,12 +52,23 @@ function start() {
     // The y axis should cover the range of profits/losses of the data.
     var xScale = d3.scaleBand().rangeRound([0, width]);
     var yScale = d3.scaleLinear().range([10, height - 10]);
-    var rScale = d3.scaleLinear().range([5, 25]);
+    var rScale = d3.scaleLinear().range([5, 50]);
 
 
+    svg.on('click', function() {
+        dots.selectAll('.dot')
+            .transition() //does bar change transition
+            .duration(function(d) {
+                return Math.random() * 1000;
+            })
+            .delay(function(d) {
+                return d.frequency * 8000
+            })
+    })
 
-
-
+    // D3 will grab all the data from "data.csv" and make it available
+    // to us in a callback function. It follows the form:
+    //
     // d3.csv('file_name.csv', accumulator, callback)
     //
     // Where 'file_name.csv' - the name of the file to read
@@ -63,16 +85,19 @@ function start() {
         d.gross = +d.gross;
         d.movie_facebook_likes = +d.movie_facebook_likes;
         d.genres = d.genres.split("|")[0];
-        d.x = xScale(d.genres) + 74;
-        d.y = yScale(d.gross - d.budget);
         return d;
     }, function(error, data) {
 
+        // We set the domain of the xScale. The domain includes 0 up to
+        // the maximum frequency in the dataset. This is because
+        // draws the tick marks
         xScale.domain(data.map(function(d){
             return d.genres;
         }));
 
-
+        // We set the domain of the yScale. Our scale is linear with a minimum at the
+        //highest loss, and a max at the highest profit. So the max difference and the
+        //minimum difference with negatives counted.
         yScale.domain([d3.max(data, function(e) {
             return e.gross - e.budget;
         }) + 20000000, -200000000]);
@@ -88,7 +113,7 @@ function start() {
 
         dots.append("g")
             .attr('class', 'x axis')
-            .attr('transform', 'translate(50,'+ (height - 20) + ' )')
+            .attr('transform', 'translate(50,'+ (height) + ' )')
             .call(d3.axisBottom(xScale));
 
         // Create the bars in the graph. First, select all '.bars' that
@@ -96,13 +121,6 @@ function start() {
         // all the pieces of data and lets us operate on them.
         var dotEnter = dots.selectAll('.dot').data(data).enter();
         var dotExit = dots.selectAll('.dot').data(data).exit();
-
-        var simulation = d3.forceSimulation(dots)
-            .force('collide', d3.forceCollide(function(d){return rScale(d.movie_facebook_likes) + 5}))
-            // .force('collision', d3.forceCollide().radius(function(d) {
-            //     return rScale(d.movie_facebook_likes)
-            // }))
-            //.on('tick', ticked);
 
         dots.append('g')
             .selectAll('.dot')
@@ -112,35 +130,37 @@ function start() {
             .attr("id", function(d) {return d.movie_title})
             .attr("stroke", 'black')
             .attr('class', 'dot')
+            
             .attr('cx', function(d) {
                 return xScale(d.genres) + 74;
             })
             .attr('cy', function(d) {
                 return yScale(d.gross - d.budget);
             })
-            .attr('r', d=>rScale(d.movie_facebook_likes))
+
+            //make transition for opacity and radius
+            //set initial values first, transition, then
+            //set values you're transitioning to
+            .attr('r', 1) //initial radius
+            .style("opacity", 0) //initial opacity
+            .transition()
+            .delay(function(d,i) {
+                return Math.random() * 150;
+            })
+            .style("opacity",1.0) //desired opacity
+            .attr("r", function(d) { //desired radius
+                return rScale(d.movie_facebook_likes)
+            })
+            .duration(640)
+            
             .on('click', function(d) {
                 console.log(d.gross - d.budget);
                 console.log(d.movie_facebook_likes);
                 console.log(d.movie_title);
             });
 
-        // function ticked() {
-        //   var u = d3.select('svg')
-        //     .selectAll('circle')
-        //     .data(dots)
-
-        //   u.enter()
-        //     .append('circle')
-        //     .merge(u)
-        //     .attr('cx', function(d) {
-        //       return d.x
-        //     })
-        //     .attr('cy', function(d) {
-        //       return d.y
-        //     })
-
-        //   u.exit().remove()
-        // }
+        dots.append("text")
+            .attr("transform", `translate(300,$400)`)
+            .text("Movie Genre");
     });
 }
