@@ -50,9 +50,9 @@ function start() {
     // Our bar chart is going to encode the profit along different topics
     // This means that the length of the x axis depends on the number of categories.
     // The y axis should cover the range of profits/losses of the data.
-    var xScale = d3.scaleBand().rangeRound([0, width]);
+    var xScale = d3.scaleBand().rangeRound([45, width - 10]);
     var yScale = d3.scaleLinear().range([10, height - 10]);
-    var rScale = d3.scaleLinear().range([5, 50]);
+    var rScale = d3.scaleLinear().range([5, 25]);
 
 
     svg.on('click', function() {
@@ -88,16 +88,68 @@ function start() {
         return d;
     }, function(error, data) {
 
-        // We set the domain of the xScale. The domain includes 0 up to
-        // the maximum frequency in the dataset. This is because
-        // draws the tick marks
-        xScale.domain(data.map(function(d){
+        var comparatorFunc = function(g1, g2) {
+            if (g1 == g2) {return true;}
+            else {return false;}
+        }
+        var genreData =data.map(function(d) {
+            return d.genres;
+        });
+        var genres = [];
+
+        for (i=0;i < genreData.length;i++) {
+            var exists = false;
+            var curr = genreData[i];
+
+            for (j=0;j<genres.length;j++) {
+                if (comparatorFunc(genres[j][0], curr)) {
+                    genres[j][1]++;
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                genres.push([curr, 1]);
+            }
+        }
+
+        var lowGenres = [];
+        for(i=0;i<genres.length;i++) {
+            if (genres[i][1] < 4) {
+                lowGenres.push(genres[i][0]);
+            }
+        }
+
+        data.filter(function(d) {
+            for (i=0;i<lowGenres.length;i++) {
+                if (lowGenres[i] == d.genres) {
+                    console.log(true);
+                    return true;
+                }
+            }
+            return false
+        })
+        console.log(data)
+
+        // for (i=0; i <genreData.length;i++) {
+        //     if (lowGenres.includes(genreData[i])) {
+
+        //     }
+        // }
+
+        xScale.domain(data.filter(function(d) {
+            for (i=0;i<lowGenres.length;i++) {
+                if (lowGenres[i] == d.genres) {
+                    console.log(true);
+                    return false;
+                }
+            }
+            return true;
+        }).map(function(d) {
             return d.genres;
         }));
 
-        // We set the domain of the yScale. Our scale is linear with a minimum at the
-        //highest loss, and a max at the highest profit. So the max difference and the
-        //minimum difference with negatives counted.
+
         yScale.domain([d3.max(data, function(e) {
             return e.gross - e.budget;
         }) + 20000000, -200000000]);
@@ -113,7 +165,7 @@ function start() {
 
         dots.append("g")
             .attr('class', 'x axis')
-            .attr('transform', 'translate(50,'+ (height) + ' )')
+            .attr('transform', 'translate(0,'+ (height) + ' )')
             .call(d3.axisBottom(xScale));
 
         // Create the bars in the graph. First, select all '.bars' that
@@ -122,17 +174,40 @@ function start() {
         var dotEnter = dots.selectAll('.dot').data(data).enter();
         var dotExit = dots.selectAll('.dot').data(data).exit();
 
-        dots.append('g')
+        var dotsEdit = dots.append('g')
             .selectAll('.dot')
             .data(data)
             .enter()
             .append('circle')
+            .filter(function(d) {
+            for (i=0;i<lowGenres.length;i++) {
+                if (lowGenres[i] == d.genres) {
+                    console.log(true);
+                    return false;
+                }
+            }
+            return true;
+            })
             .attr("id", function(d) {return d.movie_title})
             .attr("stroke", 'black')
             .attr('class', 'dot')
-            
+
             .attr('cx', function(d) {
-                return xScale(d.genres) + 84;
+                var truePos = xScale(d.genres) + 44;
+                var randVary = (Math.random() * Math.round(Math.random()) * 2 - 1);
+                var profitLoss = Math.abs(d.gross - d.budget);
+                var densityComp = 0;
+                if (profitLoss == 0) {
+                    return truePos;
+                } else if (profitLoss < 80000000){
+                    densityComp = 20;
+                } else if (profitLoss < 150000000){
+                    densityComp = 5;
+                }  else if (profitLoss < 300000000){
+                    densityComp = 1;
+                }
+                var x = truePos + (randVary * densityComp);
+                return x;
             })
             .attr('cy', function(d) {
                 return yScale(d.gross - d.budget);
@@ -143,21 +218,22 @@ function start() {
             //set values you're transitioning to
             .attr('r', 1) //initial radius
             .style("opacity", 0) //initial opacity
+            .on('click', function(d) {
+                console.log(d.gross - d.budget);
+                console.log(d.movie_facebook_likes);
+                console.log(d.movie_title);
+            })
             .transition()
             .delay(function(d,i) {
-                return Math.random() * 150;
+                return Math.random() * yScale(d.gross - d.budget) * 30;
             })
             .style("opacity",1.0) //desired opacity
             .attr("r", function(d) { //desired radius
                 return rScale(d.movie_facebook_likes)
             })
-            .duration(640)
-            
-            .on('click', function(d) {
-                console.log(d.gross - d.budget);
-                console.log(d.movie_facebook_likes);
-                console.log(d.movie_title);
-            });
+            .duration(640);
+
+
 
         //tryna make axis labels appear (no succes yet)
         // dots.append("text")
