@@ -8,6 +8,9 @@ window.onload = start;
 // This is where all of our javascript code resides. This method
 // is called by "window" when the document (everything you see on
 // the screen) has finished loading.
+var filterSwitchedOff = "select-profit"
+var width = 1350;
+var height = 700;
 function start() {
     // Select the graph from the HTML page and save
     // a reference to it for later.
@@ -16,8 +19,6 @@ function start() {
     // Specify the width and height of our graph
     // as variables so we can use them later.
     // Remember, hardcoding sucks! :)
-    var width = window.innerWidth -40;
-    var height = window.innerHeight - 50;
 
     // Here we tell D3 to select the graph that we defined above.
     // Then, we add an <svg></svg> tag inside the graph.
@@ -123,13 +124,11 @@ function start() {
         data.filter(function(d) {
             for (i=0;i<lowGenres.length;i++) {
                 if (lowGenres[i] == d.genres) {
-                    console.log(true);
                     return true;
                 }
             }
             return false
         })
-        console.log(data)
 
         // for (i=0; i <genreData.length;i++) {
         //     if (lowGenres.includes(genreData[i])) {
@@ -140,7 +139,6 @@ function start() {
         xScale.domain(data.filter(function(d) {
             for (i=0;i<lowGenres.length;i++) {
                 if (lowGenres[i] == d.genres) {
-                    console.log(true);
                     return false;
                 }
             }
@@ -182,7 +180,6 @@ function start() {
             .filter(function(d) {
             for (i=0;i<lowGenres.length;i++) {
                 if (lowGenres[i] == d.genres) {
-                    console.log(true);
                     return false;
                 }
             }
@@ -199,10 +196,14 @@ function start() {
                 var densityComp = 0;
                 if (profitLoss == 0) {
                     return truePos;
+                } else if (profitLoss < 40000000){
+                    densityComp = 25;
                 } else if (profitLoss < 80000000){
                     densityComp = 20;
+                } else if (profitLoss < 120000000){
+                    densityComp = 15;
                 } else if (profitLoss < 150000000){
-                    densityComp = 5;
+                    densityComp = 10;
                 }  else if (profitLoss < 300000000){
                     densityComp = 1;
                 }
@@ -225,9 +226,9 @@ function start() {
             })
             .transition()
             .delay(function(d,i) {
-                return Math.random() * yScale(d.gross - d.budget) * 30;
+                return Math.random() * yScale(d.gross - d.budget) * 15;
             })
-            .style("opacity",1.0) //desired opacity
+            .style("opacity",.3) //desired opacity
             .attr("r", function(d) { //desired radius
                 return rScale(d.movie_facebook_likes)
             })
@@ -235,13 +236,67 @@ function start() {
 
 
 
-        //tryna make axis labels appear (no succes yet)
-        // dots.append("text")
-        //     .attr("transform", "translate(" + (width/2) + ", " + height + ")")
-        //     .text("Movie Genre");
-
-        // dots.append("g")
-        //     .attr("transform", "translate(0," + height + ")")
-        //     .call(d3.axisBottom(x));
     });
+    document.getElementById(filterSwitchedOff).disabled = true;
 }
+
+function switchFilter(filterType, toSwitchOff) {
+            document.getElementById(filterSwitchedOff).disabled = false;
+            document.getElementById(toSwitchOff).disabled = true;
+            filterSwitchedOff = toSwitchOff;
+            var yScale = d3.scaleLinear().range([10, height - 10]);
+            var svg = d3.select("svg").transition();
+            d3.csv('movies.csv', function(d) {
+                d.budget = +d.budget;
+                d.gross = +d.gross;
+                d.movie_facebook_likes = +d.movie_facebook_likes;
+                d.genres = d.genres.split("|")[0];
+                return d;
+            }, function(error, data) {
+                switch (filterType) {
+                    case 'profit':
+                        yScale.domain([d3.max(data, function(e) {
+                            return e.gross - e.budget;
+                        }) + 20000000, -200000000]);
+                        svg.selectAll('.dot')
+                            .duration(750)
+                            .attr('cy', function(d) {
+                                return yScale(d.gross - d.budget);
+                            })
+                        svg.select('.y.axis')
+                            .duration(750)
+                            .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
+                        break;
+                    case 'budget':
+                        yScale.domain([d3.max(data, function(e) {
+                            return e.budget;
+                        }) + 20000000, d3.min(data, function(e) {
+                            return e.budget;
+                        })]);
+                        svg.selectAll('.dot')
+                            .duration(750)
+                            .attr('cy', function(d) {
+                                return yScale(d.budget);
+                            })
+                        svg.select('.y.axis')
+                            .duration(750)
+                            .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
+                        break;
+                    case 'revenue':
+                        yScale.domain([d3.max(data, function(e) {
+                            return e.gross;
+                        }) + 20000000, d3.min(data, function(e) {
+                            return e.gross;
+                        })]);
+                        svg.selectAll('.dot')
+                            .duration(750)
+                            .attr('cy', function(d) {
+                                return yScale(d.gross);
+                            })
+                        svg.select('.y.axis')
+                            .duration(750)
+                            .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
+                        break;
+                }
+            });
+        }

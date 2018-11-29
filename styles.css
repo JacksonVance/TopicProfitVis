@@ -1,3 +1,7 @@
+body {
+    background-color: #ABB
+}
+
 .dot {
   fill: #40bcb8;
 }
@@ -15,4 +19,70 @@
 }
 .x.axis path {
   display: none;
+}
+
+.selections {
+  list-style-type: none;
+  margin:3px 0 3px 0;
+  padding:0;
+}
+
+.selections li {
+    float:left;
+    margin:0 5px 0 0;
+}
+
+.selections label {
+    padding:5px;
+    cursor:pointer;
+    -webkit-appearance: button;
+    /* WebKit */
+    -moz-appearance: button;
+    /* Mozilla */
+    -o-appearance: button;
+    /* Opera */
+    -ms-appearance: button;
+    /* Internet Explorer */
+    appearance: button;
+    /* CSS3 */
+}
+
+.selections label:hover {
+    background:#DDD;
+}
+
+.selected{
+  outline:1px solid red;
+}
+.btn {
+    background-color: white;
+
+    border: 1px solid white;
+    border-radius: 3px;
+
+    box-shadow: 1px 1px 2px 0px #b3b3b3;
+
+    height: 25px;
+
+    font-family: "Arial", Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.btn:disabled {
+    background-color: #c6c6c6;
+
+    border-color: #c6c6c6;
+
+    color: black;
+}
+.btn-5 {
+    width: 5%;
+    margin-right: 2%;
+    margin-bottom: 1%;
+}
+
+#filter-buttons {
+    background-color: #666
+    margin-top: 0px;
 }

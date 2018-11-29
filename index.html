@@ -9,6 +9,18 @@
 	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-	<div id="graph"></div>
+	<div id="filter-buttons">
+        <button id="select-profit" class="btn btn-5" value="profit" onclick='switchFilter("profit", "select-profit")'>
+            Profit
+        </button>
+        <button id="select-budget" class="btn btn-5" value="budget" onclick='switchFilter("budget", "select-budget")'>
+            Budget
+        </button>
+        <button id="select-revenue" class="btn btn-5" value="revenue" onclick='switchFilter("revenue", "select-revenue")'>
+            Revenue
+        </button>
+    </div>
+    <div id="graph"></div>
+
 </body>
 </html>
