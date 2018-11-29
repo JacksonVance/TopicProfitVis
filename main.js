@@ -12,48 +12,23 @@ var filterSwitchedOff = "select-profit"
 var width = 1350;
 var height = 700;
 function start() {
-    // Select the graph from the HTML page and save
-    // a reference to it for later.
+
     var graph = document.getElementById('graph');
 
-    // Specify the width and height of our graph
-    // as variables so we can use them later.
-    // Remember, hardcoding sucks! :)
 
-    // Here we tell D3 to select the graph that we defined above.
-    // Then, we add an <svg></svg> tag inside the graph.
-    // On the <svg> element, we set the width and height.
-    // Then, we save the reference to this element in the "svg" variable,
-    // so we can use it later.
-    //
-    // So our code now looks like this in the browser:
-    // <svg width="700" height="600">
-    // </svg>
     var svg = d3.select(graph)
         .append('svg')
         .attr('width', width + 40)
         .attr('height', height + 50);
 
-    // Remember, "svg" now references to <svg width="700" height="600"></svg>
-    // So now we append a group <g></g> tag to our svg element, and return a
-    // reference to that and save it in the "bars" variable.
-    //
-    // Now bars looks like this:
-    // <g></g>
-    //
-    // And the svg element in our browser looks like this:
-    // <svg width="700" height="600">
-    //  <g></g>
-    // </svg>
+
     var dots = svg.append('g');
 
 
-    // Our bar chart is going to encode the profit along different topics
-    // This means that the length of the x axis depends on the number of categories.
-    // The y axis should cover the range of profits/losses of the data.
+
     var xScale = d3.scaleBand().rangeRound([45, width - 10]);
     var yScale = d3.scaleLinear().range([10, height - 10]);
-    var rScale = d3.scaleLinear().range([5, 25]);
+    var rScale = d3.scaleLinear().range([3, 25]);
 
 
     svg.on('click', function() {
@@ -66,6 +41,40 @@ function start() {
                 return d.frequency * 8000
             })
     })
+
+    // var brush = d3.brushX().extent([[0, 0], [width, height]]),
+    //     brushX = d3.scaleLinear().range([0, width]),
+    //     brushY = d3.scaleLinear().range([0, height]);
+
+    // // brush.extent([[brushX.range()[0], 0], [brushX.range()[1], height]]);
+
+    // svg.append("g")
+    //       .attr("class", "brush")
+    //       .call(brush);
+
+    // brush.on("start", brushstart)
+    //     .on("brushing", brushing)
+    //     .on("end", brushend);
+
+    // function brushstart() {
+    // }
+
+    // function brushing() {
+    //       var e = brush.extent(); //a variable that saves the top left and bottom right coordinates of your current extent
+    //       svg.selectAll("circle").classed("brushed",
+    //         function(d){
+    //           return (e[0][0] <= brushX.invert(d.x) && brushX.invert(d.x) <= e[1][0]
+    //             && e[0][1] <= brushY.invert(d.y) && brushY.invert(d.y) <= e[1][1]);
+    //         })
+
+    //       // brushed_ids = svg.selectAll('brushed').data().map(e=>e.index);
+    //       // svg2.selectAll("circle").classed("brushed", function(d){
+    //       //   return brushed_ids.includes(d.index);
+    //       // });
+    // }
+
+    // function brushend() {
+    // }
 
     // D3 will grab all the data from "data.csv" and make it available
     // to us in a callback function. It follows the form:
@@ -86,6 +95,7 @@ function start() {
         d.gross = +d.gross;
         d.movie_facebook_likes = +d.movie_facebook_likes;
         d.genres = d.genres.split("|")[0];
+        if (d.budget == 600000000) {d.budget = 8577000}
         return d;
     }, function(error, data) {
 
@@ -130,12 +140,6 @@ function start() {
             return false
         })
 
-        // for (i=0; i <genreData.length;i++) {
-        //     if (lowGenres.includes(genreData[i])) {
-
-        //     }
-        // }
-
         xScale.domain(data.filter(function(d) {
             for (i=0;i<lowGenres.length;i++) {
                 if (lowGenres[i] == d.genres) {
@@ -166,9 +170,7 @@ function start() {
             .attr('transform', 'translate(0,'+ (height) + ' )')
             .call(d3.axisBottom(xScale));
 
-        // Create the bars in the graph. First, select all '.bars' that
-        // currently exist, then load the data into them. enter() selects
-        // all the pieces of data and lets us operate on them.
+
         var dotEnter = dots.selectAll('.dot').data(data).enter();
         var dotExit = dots.selectAll('.dot').data(data).exit();
 
@@ -223,6 +225,7 @@ function start() {
                 console.log(d.gross - d.budget);
                 console.log(d.movie_facebook_likes);
                 console.log(d.movie_title);
+                editNode(d);
             })
             .transition()
             .delay(function(d,i) {
@@ -240,6 +243,15 @@ function start() {
     document.getElementById(filterSwitchedOff).disabled = true;
 }
 
+function editNode(node) {
+    var element = document.getElementById(node.movie_title);
+    if (element.getAttribute('class') != 'dot selected')
+        element.setAttribute('class', 'dot selected');
+    else {
+        element.setAttribute('class', 'dot');
+    }
+}
+
 function switchFilter(filterType, toSwitchOff) {
             document.getElementById(filterSwitchedOff).disabled = false;
             document.getElementById(toSwitchOff).disabled = true;
@@ -251,6 +263,7 @@ function switchFilter(filterType, toSwitchOff) {
                 d.gross = +d.gross;
                 d.movie_facebook_likes = +d.movie_facebook_likes;
                 d.genres = d.genres.split("|")[0];
+                if (d.budget == 600000000) {d.budget = 8577000}
                 return d;
             }, function(error, data) {
                 switch (filterType) {

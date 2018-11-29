@@ -1,5 +1,5 @@
 body {
-    background-color: #ABB
+    background-color: #9dacc4
 }
 
 .dot {
@@ -52,7 +52,7 @@ body {
 }
 
 .selected{
-  outline:1px solid red;
+  fill:brown;
 }
 .btn {
     background-color: white;
@@ -77,12 +77,21 @@ body {
     color: black;
 }
 .btn-5 {
-    width: 5%;
-    margin-right: 2%;
+    width: 50%;
+    margin-right: 10%;
     margin-bottom: 1%;
 }
 
 #filter-buttons {
     background-color: #666
     margin-top: 0px;
+
+}
+
+.node.brushed {
+      fill: pink;
+}
+.brush{
+  fill: gray;
+  fill.opacity:.2;
 }
