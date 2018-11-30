@@ -23,7 +23,106 @@ function start() {
 
 
     var dots = svg.append('g');
+    var profitOptions = d3.select(graph).append('select').text('Profit Range').attr('id', 'profitRange');
+        profitOptions.append('option')
+                    .text("Profit (Loss) Range")
+                    .attr('value', 'null');
+        profitOptions.append('option')
+                    .text("200M+")
+                    .attr('value', '0');
+        profitOptions.append('option')
+                    .text("100-200M")
+                    .attr('value', '1');
+        profitOptions.append('option')
+                    .text("50-100M")
+                    .attr('value', '2');
+        profitOptions.append('option')
+                    .text("(50)-50M")
+                    .attr('value', '3');
+        profitOptions.append('option')
+                    .text("(100)-(50M)")
+                    .attr('value', '4');
+        profitOptions.append('option')
+                    .text("(200)-(100M)")
+                    .attr('value', '5');
 
+    d3.select(graph).append('p');
+
+    d3.select(graph).append('input').text('Title Search').attr('id', 'title').attr('type', 'text');
+
+    d3.select(graph)
+        .append("p")
+        .append('button')
+        .text('Select Nodes')
+        .on('click', function() {
+            dots.selectAll('.dot')
+                .filter(function(d) {
+                    if (d.movie_title.toLowerCase() === ($('#title').val()).toLowerCase()) {
+                        console.log("found");
+                        editNode(d);
+                    }
+                    switch ($('#profitRange').val()) {
+                        case 'null':
+                            break;
+                        case '0':
+                            var rangeArray = [200000000, 1000000000];
+                            var profit = d.gross - d.budget;
+                            console.log(rangeArray[0]);
+                            if (profit > rangeArray[0] && profit < rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case '1':
+                            var rangeArray = [100000000, 200000000];
+                            var profit = d.gross - d.budget;
+                            console.log(rangeArray[0]);
+                            if (profit > rangeArray[0] && profit < rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case '2':
+                            var rangeArray = [50000000, 100000000];
+                            var profit = d.gross - d.budget;
+                            console.log(rangeArray[0]);
+                            if (profit > rangeArray[0] && profit < rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case '3':
+                            var rangeArray = [-50000000, 50000000];
+                            var profit = d.gross - d.budget;
+                            console.log(rangeArray[0]);
+                            if (profit > rangeArray[0] && profit < rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case '4':
+                            var rangeArray = [-100000000, -50000000];
+                            var profit = d.gross - d.budget;
+                            console.log(rangeArray[0]);
+                            if (profit > rangeArray[0] && profit < rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case '5':
+                            var rangeArray = [-200000000, -100000000];
+                            var profit = d.gross - d.budget;
+                            console.log(rangeArray[0]);
+                            if (profit > rangeArray[0] && profit < rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                    }
+                    // if ($('#profitRange').val() != null) {
+                    //     var rangeArray = $('#profitRange').val();
+                    //     var profit = d.gross - d.budget;
+                    //     console.log(rangeArray[0]);
+                    //     if (profit > rangeArray[0] && profit < rangeArray[1]) {
+                    //         editNode(d);
+                    //     }
+                    // }
+                })
+        })
 
 
     var xScale = d3.scaleBand().rangeRound([45, width - 10]);
@@ -41,40 +140,6 @@ function start() {
                 return d.frequency * 8000
             })
     })
-
-    // var brush = d3.brushX().extent([[0, 0], [width, height]]),
-    //     brushX = d3.scaleLinear().range([0, width]),
-    //     brushY = d3.scaleLinear().range([0, height]);
-
-    // // brush.extent([[brushX.range()[0], 0], [brushX.range()[1], height]]);
-
-    // svg.append("g")
-    //       .attr("class", "brush")
-    //       .call(brush);
-
-    // brush.on("start", brushstart)
-    //     .on("brushing", brushing)
-    //     .on("end", brushend);
-
-    // function brushstart() {
-    // }
-
-    // function brushing() {
-    //       var e = brush.extent(); //a variable that saves the top left and bottom right coordinates of your current extent
-    //       svg.selectAll("circle").classed("brushed",
-    //         function(d){
-    //           return (e[0][0] <= brushX.invert(d.x) && brushX.invert(d.x) <= e[1][0]
-    //             && e[0][1] <= brushY.invert(d.y) && brushY.invert(d.y) <= e[1][1]);
-    //         })
-
-    //       // brushed_ids = svg.selectAll('brushed').data().map(e=>e.index);
-    //       // svg2.selectAll("circle").classed("brushed", function(d){
-    //       //   return brushed_ids.includes(d.index);
-    //       // });
-    // }
-
-    // function brushend() {
-    // }
 
     // D3 will grab all the data from "data.csv" and make it available
     // to us in a callback function. It follows the form:
@@ -95,11 +160,11 @@ function start() {
         d.gross = +d.gross;
         d.movie_facebook_likes = +d.movie_facebook_likes;
         d.genres = d.genres.split("|")[0];
+        d.movie_title = d.movie_title;
         if (d.budget == 600000000) {d.budget = 8577000}
         return d;
     }, function(error, data) {
 
-        //code for filtering out genres with too few data points
         var comparatorFunc = function(g1, g2) {
             if (g1 == g2) {return true;}
             else {return false;}
@@ -171,22 +236,6 @@ function start() {
             .attr('transform', 'translate(0,'+ (height) + ' )')
             .call(d3.axisBottom(xScale));
 
-        //label axes 
-        svg.append("text")
-            .attr("class", "x axis label")
-            // .attr("x", 400) -> also works to code the individual aspects of your "translate"
-            // .attr("y", 500)
-            .attr("transform", "translate(" + (width/2) + ", " + (height + 40) + ")")
-            .style("font-weight", "bold")
-            .style("font-size", "85%")
-            .text("Movie Genre");
-
-        svg.append("text")
-            .attr("class", "y axis label")
-            .attr("transform", "translate(12, " + (height/2) + "), rotate(-90)")
-            .style("font-weight", "bold")
-            .style("font-size", "85%")
-            .text("Profit / Loss");
 
         var dotEnter = dots.selectAll('.dot').data(data).enter();
         var dotExit = dots.selectAll('.dot').data(data).exit();
@@ -242,22 +291,6 @@ function start() {
                 console.log(d.gross - d.budget);
                 console.log(d.movie_facebook_likes);
                 console.log(d.movie_title);
-
-                svg.append("text")
-                    .attr("x", (width/2))
-                    .attr("y", 150)
-                    .style("font-weight", "bold")
-                    .text(d.movie_title)
-
-                svg.append("text")
-                    .attr("x", (width/2))
-                    .attr("y", 175)
-                    .text("Profit: $" + (comma(d.gross - d.budget)))
-
-                svg.append("text")
-                    .attr("x", (width/2))
-                    .attr("y", 200)
-                    .text("Director: " + (d.director_name))
                 editNode(d);
             })
             .transition()
@@ -274,10 +307,6 @@ function start() {
 
     });
     document.getElementById(filterSwitchedOff).disabled = true;
-}
-
-function comma(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function editNode(node) {
@@ -318,7 +347,6 @@ function switchFilter(filterType, toSwitchOff) {
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
                         break;
                     case 'budget':
-
                         yScale.domain([d3.max(data, function(e) {
                             return e.budget;
                         }) + 20000000, d3.min(data, function(e) {
@@ -332,7 +360,6 @@ function switchFilter(filterType, toSwitchOff) {
                         svg.select('.y.axis')
                             .duration(750)
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
-
                         break;
                     case 'revenue':
                         yScale.domain([d3.max(data, function(e) {
