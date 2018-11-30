@@ -11,6 +11,8 @@ window.onload = start;
 var filterSwitchedOff = "select-profit"
 var width = 1350;
 var height = 700;
+var mode = 'Profit';
+var node;
 function start() {
 
     var graph = document.getElementById('graph');
@@ -127,7 +129,7 @@ function start() {
 
     var xScale = d3.scaleBand().rangeRound([45, width - 10]);
     var yScale = d3.scaleLinear().range([10, height - 10]);
-    var rScale = d3.scaleLinear().range([3, 25]);
+    var rScale = d3.scaleLinear().range([3, 20]);
 
 
     svg.on('click', function() {
@@ -268,7 +270,7 @@ function start() {
             return true;
             })
             .attr("id", function(d) {return d.movie_title})
-            .attr("stroke", 'black')
+            .attr("stroke", '#108985')
             .attr('class', 'dot')
 
             .attr('cx', function(d) {
@@ -305,16 +307,33 @@ function start() {
                 console.log(d.gross - d.budget);
                 console.log(d.movie_facebook_likes);
                 console.log(d.movie_title);
+                $(".metadata").remove();
                 svg.append("text")
+                    .attr('class', 'metadata')
                     .attr("x", (width/2))
                     .attr("y", 150)
                     .style("font-weight", "bold")
                     .text(d.movie_title)
                  svg.append("text")
+                    .attr('class', 'metadata view')
                     .attr("x", (width/2))
                     .attr("y", 175)
-                    .text("Profit: $" + (comma(d.gross - d.budget)))
+                    .text(function() {
+                        switch (mode) {
+                            case 'Profit':
+                                return mode + ": $" + (comma(d.gross - d.budget));
+                                break;
+                            case 'Budget':
+                                return mode + ": $" + (comma(d.budget));
+                                break;
+                            case 'Revenue':
+                                return mode + ": $" + (comma(d.gross));
+                                break;
+                        }
+
+                    })
                  svg.append("text")
+                    .attr('class', 'metadata')
                     .attr("x", (width/2))
                     .attr("y", 200)
                     .text("Director: " + (d.director_name))
@@ -340,8 +359,9 @@ function comma(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function editNode(node) {
-    var element = document.getElementById(node.movie_title);
+function editNode(newNode) {
+    node = newNode;
+    element = document.getElementById(node.movie_title);
     if (element.getAttribute('class') != 'dot selected')
         element.setAttribute('class', 'dot selected');
     else {
@@ -365,6 +385,7 @@ function switchFilter(filterType, toSwitchOff) {
             }, function(error, data) {
                 switch (filterType) {
                     case 'profit':
+                        mode = 'Profit';
                         yScale.domain([d3.max(data, function(e) {
                             return e.gross - e.budget;
                         }) + 20000000, -200000000]);
@@ -376,11 +397,17 @@ function switchFilter(filterType, toSwitchOff) {
                         svg.select('.y.axis.label')
                             .duration(750)
                             .text('Profit/Loss');
+                        if (node != null) {
+                            svg.select('.metadata.view')
+                                .duration(750)
+                                .text(mode + ": $" + (comma(d.gross - d.budget)))
+                        }
                         svg.select('.y.axis')
                             .duration(750)
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
                         break;
                     case 'budget':
+                        mode = 'Budget';
                         yScale.domain([d3.max(data, function(e) {
                             return e.budget;
                         }) + 20000000, d3.min(data, function(e) {
@@ -394,11 +421,17 @@ function switchFilter(filterType, toSwitchOff) {
                         svg.select('.y.axis.label')
                             .duration(750)
                             .text('Budget');
+                        if(node != null) {
+                            svg.select('.metadata.view')
+                                .duration(750)
+                                .text(mode + ": $" + (comma(node.budget)))
+                        }
                         svg.select('.y.axis')
                             .duration(750)
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
                         break;
                     case 'revenue':
+                        mode = 'Revenue';
                         yScale.domain([d3.max(data, function(e) {
                             return e.gross;
                         }) + 20000000, d3.min(data, function(e) {
@@ -412,6 +445,11 @@ function switchFilter(filterType, toSwitchOff) {
                         svg.select('.y.axis.label')
                             .duration(750)
                             .text('Revenue');
+                        if(node != null) {
+                            svg.select('.metadata.view')
+                                .duration(750)
+                                .text(mode + ": $" + (comma(node.gross)))
+                        }
                         svg.select('.y.axis')
                             .duration(750)
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
