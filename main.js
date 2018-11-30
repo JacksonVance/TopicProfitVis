@@ -99,6 +99,7 @@ function start() {
         return d;
     }, function(error, data) {
 
+        //code for filtering out genres with too few data points
         var comparatorFunc = function(g1, g2) {
             if (g1 == g2) {return true;}
             else {return false;}
@@ -170,6 +171,22 @@ function start() {
             .attr('transform', 'translate(0,'+ (height) + ' )')
             .call(d3.axisBottom(xScale));
 
+        //label axes 
+        svg.append("text")
+            .attr("class", "x axis label")
+            // .attr("x", 400) -> also works to code the individual aspects of your "translate"
+            // .attr("y", 500)
+            .attr("transform", "translate(" + (width/2) + ", " + (height + 40) + ")")
+            .style("font-weight", "bold")
+            .style("font-size", "85%")
+            .text("Movie Genre");
+
+        svg.append("text")
+            .attr("class", "y axis label")
+            .attr("transform", "translate(12, " + (height/2) + "), rotate(-90)")
+            .style("font-weight", "bold")
+            .style("font-size", "85%")
+            .text("Profit / Loss");
 
         var dotEnter = dots.selectAll('.dot').data(data).enter();
         var dotExit = dots.selectAll('.dot').data(data).exit();
@@ -225,6 +242,22 @@ function start() {
                 console.log(d.gross - d.budget);
                 console.log(d.movie_facebook_likes);
                 console.log(d.movie_title);
+
+                svg.append("text")
+                    .attr("x", (width/2))
+                    .attr("y", 150)
+                    .style("font-weight", "bold")
+                    .text(d.movie_title)
+
+                svg.append("text")
+                    .attr("x", (width/2))
+                    .attr("y", 175)
+                    .text("Profit: $" + (comma(d.gross - d.budget)))
+
+                svg.append("text")
+                    .attr("x", (width/2))
+                    .attr("y", 200)
+                    .text("Director: " + (d.director_name))
                 editNode(d);
             })
             .transition()
@@ -241,6 +274,10 @@ function start() {
 
     });
     document.getElementById(filterSwitchedOff).disabled = true;
+}
+
+function comma(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function editNode(node) {
@@ -281,6 +318,7 @@ function switchFilter(filterType, toSwitchOff) {
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
                         break;
                     case 'budget':
+
                         yScale.domain([d3.max(data, function(e) {
                             return e.budget;
                         }) + 20000000, d3.min(data, function(e) {
@@ -294,6 +332,7 @@ function switchFilter(filterType, toSwitchOff) {
                         svg.select('.y.axis')
                             .duration(750)
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
+
                         break;
                     case 'revenue':
                         yScale.domain([d3.max(data, function(e) {
