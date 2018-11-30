@@ -236,6 +236,20 @@ function start() {
             .attr('transform', 'translate(0,'+ (height) + ' )')
             .call(d3.axisBottom(xScale));
 
+        svg.append("text")
+            .attr("class", "x axis label")
+            // .attr("x", 400) -> also works to code the individual aspects of your "translate"
+            // .attr("y", 500)
+            .attr("transform", "translate(" + (width/2) + ", " + (height + 40) + ")")
+            .style("font-weight", "bold")
+            .style("font-size", "85%")
+            .text("Movie Genre");
+         svg.append("text")
+            .attr("class", "y axis label")
+            .attr("transform", "translate(12, " + (height/2) + "), rotate(-90)")
+            .style("font-weight", "bold")
+            .style("font-size", "85%")
+            .text("Profit / Loss");
 
         var dotEnter = dots.selectAll('.dot').data(data).enter();
         var dotExit = dots.selectAll('.dot').data(data).exit();
@@ -291,6 +305,19 @@ function start() {
                 console.log(d.gross - d.budget);
                 console.log(d.movie_facebook_likes);
                 console.log(d.movie_title);
+                svg.append("text")
+                    .attr("x", (width/2))
+                    .attr("y", 150)
+                    .style("font-weight", "bold")
+                    .text(d.movie_title)
+                 svg.append("text")
+                    .attr("x", (width/2))
+                    .attr("y", 175)
+                    .text("Profit: $" + (comma(d.gross - d.budget)))
+                 svg.append("text")
+                    .attr("x", (width/2))
+                    .attr("y", 200)
+                    .text("Director: " + (d.director_name))
                 editNode(d);
             })
             .transition()
@@ -307,6 +334,10 @@ function start() {
 
     });
     document.getElementById(filterSwitchedOff).disabled = true;
+}
+
+function comma(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function editNode(node) {
@@ -342,6 +373,9 @@ function switchFilter(filterType, toSwitchOff) {
                             .attr('cy', function(d) {
                                 return yScale(d.gross - d.budget);
                             })
+                        svg.select('.y.axis.label')
+                            .duration(750)
+                            .text('Profit/Loss');
                         svg.select('.y.axis')
                             .duration(750)
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
@@ -357,6 +391,9 @@ function switchFilter(filterType, toSwitchOff) {
                             .attr('cy', function(d) {
                                 return yScale(d.budget);
                             })
+                        svg.select('.y.axis.label')
+                            .duration(750)
+                            .text('Budget');
                         svg.select('.y.axis')
                             .duration(750)
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
@@ -372,6 +409,9 @@ function switchFilter(filterType, toSwitchOff) {
                             .attr('cy', function(d) {
                                 return yScale(d.gross);
                             })
+                        svg.select('.y.axis.label')
+                            .duration(750)
+                            .text('Revenue');
                         svg.select('.y.axis')
                             .duration(750)
                             .call(d3.axisLeft(yScale).ticks(height/20).tickFormat(d3.format(".2s")))
