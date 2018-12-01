@@ -102,19 +102,14 @@ body {
     font-weight: bold;
 }
 
-#range-header {
-    font-family: "Arial", Arial, sans-serif;
-    font-size: 12px;
-    font-weight: bold;
-}
 
 #range-side {
     font-family: "Arial", Arial, sans-serif;
-    font-size: 8px;
+    font-size: 9px;
     font-weight: bold;
 }
 
-#director-header {
+.header {
     font-family: "Arial", Arial, sans-serif;
     font-size: 12px;
     font-weight: bold;
@@ -122,4 +117,17 @@ body {
 
 .small-spacer {
   margin-top: 0px;
+}
+
+.legend {
+  font-family: "Arial", Arial, sans-serif;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+#title {
+  font-size:20px;
+  position: relative;
+  left:550px;
+
 }

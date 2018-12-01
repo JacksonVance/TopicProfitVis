@@ -28,7 +28,7 @@ function start() {
     d3.select(graph).append('p');
     d3.select(graph).append('text').attr('id', 'selection-header').text('Select Nodes By:')
     d3.select(graph).append('p');
-    d3.select(graph).append('text').attr('id', 'range-header').text('Profit/Loss Range')
+    d3.select(graph).append('text').attr('class', 'header').text('Profit/Loss Range')
     d3.select(graph).append('br');
     d3.select(graph).append('text').attr('id', 'range-side').text('Max  ');
     var selRangeMax = d3.select(graph).append('input').attr('id', 'rangeMax').attr('placeholder', 'i.e. 1000000');
@@ -37,10 +37,48 @@ function start() {
     var selRangeMin = d3.select(graph).append('input').attr('id', 'rangeMin').attr('placeholder', 'i.e. -1000000');
 
     d3.select(graph).append('p');
-    d3.select(graph).append('text').attr('id', 'director-header').text('Director Name');
+    d3.select(graph).append('text').attr('class', 'header').text('Director Name');
     d3.select(graph).append('br');
-    d3.select(graph).append('input').text('Title Search').attr('id', 'title').attr('type', 'text').attr('placeholder', 'i.e. Christopher Nolan');
+    d3.select(graph).append('input').text('Director Search').attr('id', 'directorSearch').attr('type', 'text').attr('placeholder', 'i.e. Christopher Nolan');
 
+    d3.select(graph).append('p');
+    d3.select(graph).append('text').attr('class', 'header').text('Facebook Likes');
+    d3.select(graph).append('br');
+    var likeOptions = d3.select(graph).append('select').attr('id', 'likesSelect');
+        likeOptions.append('option')
+                    .text('-select-')
+                    .attr('value', '0');
+        likeOptions.append('option')
+                    .text('+200,000')
+                    .attr('value', '1');
+        likeOptions.append('option')
+                    .text('150,000-200,000')
+                    .attr('value', '2');
+        likeOptions.append('option')
+                    .text('100,000-150,000')
+                    .attr('value', '3');
+        likeOptions.append('option')
+                    .text('75,000-100,000')
+                    .attr('value', '4');
+        likeOptions.append('option')
+                    .text('50,000-75,000')
+                    .attr('value', '5');
+        likeOptions.append('option')
+                    .text('25,000-50,000')
+                    .attr('value', '6');
+        likeOptions.append('option')
+                    .text('10,000-25,000')
+                    .attr('value', '7');
+        likeOptions.append('option')
+                    .text('1,000-10,000')
+                    .attr('value', '8');
+        likeOptions.append('option')
+                    .text('<1,000')
+                    .attr('value', '9');
+
+
+
+    d3.select(graph).append('p');
     d3.select(graph)
         .append("p")
         .append('button')
@@ -48,18 +86,99 @@ function start() {
         .on('click', function() {
             dots.selectAll('.dot')
                 .filter(function(d) {
-                    if (d.director_name.toLowerCase() === ($('#title').val()).toLowerCase()) {
-                        console.log("found");
+                    if (d.director_name.toLowerCase() === ($('#title').val()).toLowerCase() && d.director_name != '') {
                         editNode(d);
                     }
-                    if ($('#rangeMax').val() != null && $('#rangeMin').val() != null) {
+                    if ($('#rangeMax').val() != null && $('#rangeMin').val() != null && $('#rangeMax').val() != $('#rangeMin').val()) {
+                        console.log('wrong');
                         var rangeArray = [Number($('#rangeMax').val()), Number($('#rangeMin').val())];
                         var profit = d.gross - d.budget;
                         if (profit < rangeArray[0] && profit > rangeArray[1]) {
                             editNode(d);
                         }
                     }
+                    switch (Number($('#likesSelect').val())) {
+                        case 0:
+                            break;
+                        case 1:
+                            var rangeArray = [1000000,200000];
+                            var likes = d.movie_facebook_likes;
+                            if (likes < rangeArray[0] && likes > rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case 2:
+                            var rangeArray = [200000,150000];
+                            var likes = d.movie_facebook_likes;
+                            if (likes < rangeArray[0] && likes > rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case 3:
+                            var rangeArray = [150000,100000];
+                            var likes = d.movie_facebook_likes;
+                            if (likes < rangeArray[0] && likes > rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case 4:
+                            var rangeArray = [100000,75000];
+                            var likes = d.movie_facebook_likes;
+                            if (likes < rangeArray[0] && likes > rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case 5:
+                            var rangeArray = [75000,50000];
+                            var likes = d.movie_facebook_likes;
+                            if (likes < rangeArray[0] && likes > rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case 1:
+                            var rangeArray = [50000,25000];
+                            var likes = d.movie_facebook_likes;
+                            if (likes < rangeArray[0] && likes > rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case 1:
+                            var rangeArray = [25000,10000];
+                            var likes = d.movie_facebook_likes;
+                            if (likes < rangeArray[0] && likes > rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case 1:
+                            var rangeArray = [10000,1000];
+                            var likes = d.movie_facebook_likes;
+                            if (likes < rangeArray[0] && likes > rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                        case 1:
+                            var rangeArray = [1000,0];
+                            var likes = d.movie_facebook_likes;
+                            if (likes < rangeArray[0] && likes > rangeArray[1]) {
+                                editNode(d);
+                            }
+                            break;
+                    }
                 })
+        })
+
+    d3.select(graph)
+        .append('p')
+        .append('button')
+        .text('Reset')
+        .on('click', function() {
+            dots.selectAll('.dot')
+                .filter(function(d) {
+                    var element = document.getElementById(d.movie_title);
+                    element.setAttribute('class', 'dot');
+                })
+                .classed('dot selection', console.log('working'))
+                .classed('dot', true)
         })
 
 
@@ -234,6 +353,8 @@ function start() {
                 return yScale(d.gross - d.budget);
             })
 
+
+
             //make transition for opacity and radius
             //set initial values first, transition, then
             //set values you're transitioning to
@@ -283,8 +404,6 @@ function start() {
             })
             .duration(640);
 
-
-
     });
     document.getElementById(filterSwitchedOff).disabled = true;
 }
@@ -295,7 +414,7 @@ function comma(x) {
 
 function editNode(newNode) {
     node = newNode;
-    element = document.getElementById(node.movie_title);
+    var element = document.getElementById(node.movie_title);
     if (element.getAttribute('class') != 'dot selected')
         element.setAttribute('class', 'dot selected');
     else {
